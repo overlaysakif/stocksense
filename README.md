@@ -1,6 +1,6 @@
 # StockSense
 
-StockSense is a Flutter-based full-stack mobile inventory and stock management application developed for ICT205 Mobile Application Development — Assessment 3.
+StockSense is a Flutter-based full-stack mobile inventory and stock management application for small retail businesses.
 
 ## Problem
 Small retail businesses often rely on manual stock counts or spreadsheets, which can cause inaccurate inventory records, missed low-stock items, duplicate entries, and slow product identification.
@@ -43,7 +43,7 @@ Camera Sensor → Barcode/QR value → Product lookup → Inventory record
 
 All team members will contribute to testing, documentation, GitHub collaboration, and the final presentation.
 
-## Assessment Requirements
+## Project Requirements
 The final solution will include at least five functional screens, meaningful device sensor integration, remote data persistence, read/write backend operations, validation and error handling, secure communication, professional documentation, and a live stakeholder demonstration.
 
 ## Status
