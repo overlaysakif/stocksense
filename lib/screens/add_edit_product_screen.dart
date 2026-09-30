@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
 
+import '../models/product.dart';
+import '../services/product_service.dart';
+
 class AddEditProductScreen extends StatefulWidget {
-  const AddEditProductScreen({super.key});
+  const AddEditProductScreen({
+    super.key,
+    required this.productService,
+  });
+
+  final ProductService productService;
 
   @override
-  State<AddEditProductScreen> createState() => _AddEditProductScreenState();
+  State<AddEditProductScreen> createState() =>
+      _AddEditProductScreenState();
 }
 
-class _AddEditProductScreenState extends State<AddEditProductScreen> {
+class _AddEditProductScreenState
+    extends State<AddEditProductScreen> {
   final _formKey = GlobalKey<FormState>();
+
   final _nameController = TextEditingController();
   final _skuController = TextEditingController();
   final _barcodeController = TextEditingController();
@@ -16,6 +27,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   final _quantityController = TextEditingController();
   final _thresholdController = TextEditingController();
   final _priceController = TextEditingController();
+
+  bool _isSaving = false;
 
   @override
   void dispose() {
@@ -26,6 +39,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     _quantityController.dispose();
     _thresholdController.dispose();
     _priceController.dispose();
+
     super.dispose();
   }
 
@@ -33,58 +47,117 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     if (value == null || value.trim().isEmpty) {
       return 'This field is required';
     }
+
     return null;
   }
 
   String? _wholeNumber(String? value) {
     final requiredError = _required(value);
-    if (requiredError != null) return requiredError;
+
+    if (requiredError != null) {
+      return requiredError;
+    }
+
     final parsed = int.tryParse(value!.trim());
+
     if (parsed == null || parsed < 0) {
       return 'Enter a valid whole number';
     }
+
     return null;
   }
 
   String? _money(String? value) {
     final requiredError = _required(value);
-    if (requiredError != null) return requiredError;
+
+    if (requiredError != null) {
+      return requiredError;
+    }
+
     final parsed = double.tryParse(value!.trim());
+
     if (parsed == null || parsed < 0) {
       return 'Enter a valid price';
     }
+
     return null;
   }
 
-  void _save() {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Product validated. Backend save will be connected next.'),
-      ),
+    setState(() {
+      _isSaving = true;
+    });
+
+    final product = Product(
+      id: '',
+      name: _nameController.text.trim(),
+      sku: _skuController.text.trim(),
+      barcode: _barcodeController.text.trim(),
+      category: _categoryController.text.trim(),
+      quantity: int.parse(_quantityController.text.trim()),
+      lowStockThreshold:
+          int.parse(_thresholdController.text.trim()),
+      price: double.parse(_priceController.text.trim()),
     );
+
+    try {
+      await widget.productService.addProduct(product);
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.of(context).pop(true);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Could not save product: $error',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add product')),
+      appBar: AppBar(
+        title: const Text('Add product'),
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          padding:
+              const EdgeInsets.fromLTRB(20, 12, 20, 32),
           children: [
             Text(
               'Product information',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style:
+                  Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
             ),
             const SizedBox(height: 6),
             Text(
               'Enter the information needed to create an inventory record.',
-              style: TextStyle(color: Colors.grey.shade700),
+              style: TextStyle(
+                color: Colors.grey.shade700,
+              ),
             ),
             const SizedBox(height: 22),
             TextFormField(
@@ -93,7 +166,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
               textInputAction: TextInputAction.next,
               decoration: const InputDecoration(
                 labelText: 'Product name',
-                prefixIcon: Icon(Icons.inventory_2_outlined),
+                prefixIcon:
+                    Icon(Icons.inventory_2_outlined),
               ),
             ),
             const SizedBox(height: 14),
@@ -135,8 +209,11 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                     controller: _quantityController,
                     validator: _wholeNumber,
                     keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(labelText: 'Quantity'),
+                    textInputAction:
+                        TextInputAction.next,
+                    decoration: const InputDecoration(
+                      labelText: 'Quantity',
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -145,8 +222,11 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                     controller: _thresholdController,
                     validator: _wholeNumber,
                     keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(labelText: 'Low-stock level'),
+                    textInputAction:
+                        TextInputAction.next,
+                    decoration: const InputDecoration(
+                      labelText: 'Low-stock level',
+                    ),
                   ),
                 ),
               ],
@@ -155,7 +235,10 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
             TextFormField(
               controller: _priceController,
               validator: _money,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: const InputDecoration(
                 labelText: 'Unit price',
                 prefixText: '\$ ',
@@ -163,11 +246,24 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
             ),
             const SizedBox(height: 26),
             FilledButton.icon(
-              onPressed: _save,
-              icon: const Icon(Icons.save_outlined),
-              label: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 14),
-                child: Text('Save product'),
+              onPressed: _isSaving ? null : _save,
+              icon: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Icon(Icons.save_outlined),
+              label: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 14),
+                child: Text(
+                  _isSaving
+                      ? 'Saving...'
+                      : 'Save product',
+                ),
               ),
             ),
           ],
