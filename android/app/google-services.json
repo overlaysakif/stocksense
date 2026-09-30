@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "763692467409",
+    "project_id": "stocksense-3fdbe",
+    "storage_bucket": "stocksense-3fdbe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:763692467409:android:259a940c2ff64741d4f1f0",
+        "android_client_info": {
+          "package_name": "com.stocksense.app.stocksense"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhpZdEdjBjftsmzkIRl23kIh9NgeSOdzQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
