@@ -97,7 +97,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 : ListView.separated(
                     padding: const EdgeInsets.fromLTRB(20, 6, 20, 110),
                     itemCount: filteredProducts.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
                       final product = filteredProducts[index];
                       return Card(
