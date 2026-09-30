@@ -41,9 +41,7 @@ class _AppShellState extends State<AppShell> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text(
-          'Product added successfully.',
-        ),
+        content: Text('Product added successfully.'),
       ),
     );
   }
@@ -70,18 +68,15 @@ class _AppShellState extends State<AppShell> {
                     Icon(
                       Icons.cloud_off_rounded,
                       size: 52,
-                      color:
-                          Theme.of(context).colorScheme.error,
+                      color: Theme.of(context).colorScheme.error,
                     ),
                     const SizedBox(height: 14),
                     Text(
                       'Unable to load inventory',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -115,6 +110,7 @@ class _AppShellState extends State<AppShell> {
           InventoryScreen(
             products: products,
             onAddProduct: _openAddProduct,
+            productService: _productService,
           ),
           const ScannerScreen(),
           const SettingsScreen(),
@@ -131,26 +127,21 @@ class _AppShellState extends State<AppShell> {
             destinations: const [
               NavigationDestination(
                 icon: Icon(Icons.dashboard_outlined),
-                selectedIcon:
-                    Icon(Icons.dashboard_rounded),
+                selectedIcon: Icon(Icons.dashboard_rounded),
                 label: 'Dashboard',
               ),
               NavigationDestination(
-                icon:
-                    Icon(Icons.inventory_2_outlined),
-                selectedIcon:
-                    Icon(Icons.inventory_2_rounded),
+                icon: Icon(Icons.inventory_2_outlined),
+                selectedIcon: Icon(Icons.inventory_2_rounded),
                 label: 'Inventory',
               ),
               NavigationDestination(
-                icon:
-                    Icon(Icons.qr_code_scanner_rounded),
+                icon: Icon(Icons.qr_code_scanner_rounded),
                 label: 'Scan',
               ),
               NavigationDestination(
                 icon: Icon(Icons.settings_outlined),
-                selectedIcon:
-                    Icon(Icons.settings_rounded),
+                selectedIcon: Icon(Icons.settings_rounded),
                 label: 'Settings',
               ),
             ],

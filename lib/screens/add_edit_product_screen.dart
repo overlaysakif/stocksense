@@ -7,17 +7,18 @@ class AddEditProductScreen extends StatefulWidget {
   const AddEditProductScreen({
     super.key,
     required this.productService,
+    this.product,
   });
 
   final ProductService productService;
+  final Product? product;
 
   @override
   State<AddEditProductScreen> createState() =>
       _AddEditProductScreenState();
 }
 
-class _AddEditProductScreenState
-    extends State<AddEditProductScreen> {
+class _AddEditProductScreenState extends State<AddEditProductScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
@@ -29,6 +30,25 @@ class _AddEditProductScreenState
   final _priceController = TextEditingController();
 
   bool _isSaving = false;
+
+  bool get _isEditing => widget.product != null;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final product = widget.product;
+
+    if (product != null) {
+      _nameController.text = product.name;
+      _skuController.text = product.sku;
+      _barcodeController.text = product.barcode;
+      _categoryController.text = product.category;
+      _quantityController.text = product.quantity.toString();
+      _thresholdController.text = product.lowStockThreshold.toString();
+      _priceController.text = product.price.toStringAsFixed(2);
+    }
+  }
 
   @override
   void dispose() {
@@ -93,19 +113,22 @@ class _AddEditProductScreenState
     });
 
     final product = Product(
-      id: '',
+      id: widget.product?.id ?? '',
       name: _nameController.text.trim(),
       sku: _skuController.text.trim(),
       barcode: _barcodeController.text.trim(),
       category: _categoryController.text.trim(),
       quantity: int.parse(_quantityController.text.trim()),
-      lowStockThreshold:
-          int.parse(_thresholdController.text.trim()),
+      lowStockThreshold: int.parse(_thresholdController.text.trim()),
       price: double.parse(_priceController.text.trim()),
     );
 
     try {
-      await widget.productService.addProduct(product);
+      if (_isEditing) {
+        await widget.productService.updateProduct(product);
+      } else {
+        await widget.productService.addProduct(product);
+      }
 
       if (!mounted) {
         return;
@@ -120,7 +143,9 @@ class _AddEditProductScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Could not save product: $error',
+            _isEditing
+                ? 'Could not update product: $error'
+                : 'Could not save product: $error',
           ),
         ),
       );
@@ -137,24 +162,26 @@ class _AddEditProductScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add product'),
+        title: Text(
+          _isEditing ? 'Edit product' : 'Add product',
+        ),
       ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding:
-              const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
           children: [
             Text(
-              'Product information',
-              style:
-                  Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+              _isEditing ? 'Update product' : 'Product information',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
             ),
             const SizedBox(height: 6),
             Text(
-              'Enter the information needed to create an inventory record.',
+              _isEditing
+                  ? 'Update the inventory information for this product.'
+                  : 'Enter the information needed to create an inventory record.',
               style: TextStyle(
                 color: Colors.grey.shade700,
               ),
@@ -166,8 +193,7 @@ class _AddEditProductScreenState
               textInputAction: TextInputAction.next,
               decoration: const InputDecoration(
                 labelText: 'Product name',
-                prefixIcon:
-                    Icon(Icons.inventory_2_outlined),
+                prefixIcon: Icon(Icons.inventory_2_outlined),
               ),
             ),
             const SizedBox(height: 14),
@@ -209,8 +235,7 @@ class _AddEditProductScreenState
                     controller: _quantityController,
                     validator: _wholeNumber,
                     keyboardType: TextInputType.number,
-                    textInputAction:
-                        TextInputAction.next,
+                    textInputAction: TextInputAction.next,
                     decoration: const InputDecoration(
                       labelText: 'Quantity',
                     ),
@@ -222,8 +247,7 @@ class _AddEditProductScreenState
                     controller: _thresholdController,
                     validator: _wholeNumber,
                     keyboardType: TextInputType.number,
-                    textInputAction:
-                        TextInputAction.next,
+                    textInputAction: TextInputAction.next,
                     decoration: const InputDecoration(
                       labelText: 'Low-stock level',
                     ),
@@ -235,8 +259,7 @@ class _AddEditProductScreenState
             TextFormField(
               controller: _priceController,
               validator: _money,
-              keyboardType:
-                  const TextInputType.numberWithOptions(
+              keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
               decoration: const InputDecoration(
@@ -255,14 +278,21 @@ class _AddEditProductScreenState
                         strokeWidth: 2,
                       ),
                     )
-                  : const Icon(Icons.save_outlined),
+                  : Icon(
+                      _isEditing
+                          ? Icons.update_rounded
+                          : Icons.save_outlined,
+                    ),
               label: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                ),
                 child: Text(
                   _isSaving
-                      ? 'Saving...'
-                      : 'Save product',
+                      ? (_isEditing ? 'Updating...' : 'Saving...')
+                      : (_isEditing
+                          ? 'Update product'
+                          : 'Save product'),
                 ),
               ),
             ),
