@@ -1,0 +1,78 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function validProduct(data) {
+      return data.keys().hasAll([
+        'name',
+        'sku',
+        'barcode',
+        'category',
+        'quantity',
+        'minStock',
+        'price',
+        'createdAt',
+        'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'name',
+        'sku',
+        'barcode',
+        'category',
+        'quantity',
+        'minStock',
+        'price',
+        'createdAt',
+        'updatedAt'
+      ])
+      && data.name is string
+      && data.name.size() > 0
+      && data.sku is string
+      && data.sku.size() > 0
+      && data.barcode is string
+      && data.barcode.size() > 0
+      && data.category is string
+      && data.category.size() > 0
+      && data.quantity is int
+      && data.quantity >= 0
+      && data.minStock is int
+      && data.minStock >= 0
+      && data.price is number
+      && data.price >= 0
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    match /products/{productId} {
+
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn()
+                    && validProduct(request.resource.data);
+
+      allow update: if isSignedIn()
+                    && validProduct(request.resource.data)
+                    && request.resource.data.createdAt == resource.data.createdAt
+                    && request.resource.data
+                        .diff(resource.data)
+                        .affectedKeys()
+                        .hasOnly([
+                          'name',
+                          'sku',
+                          'barcode',
+                          'category',
+                          'quantity',
+                          'minStock',
+                          'price',
+                          'updatedAt'
+                        ]);
+
+      allow delete: if isSignedIn();
+    }
+  }
+}
