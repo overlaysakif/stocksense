@@ -21,6 +21,34 @@ class Product {
 
   bool get isLowStock => quantity <= lowStockThreshold;
 
+  factory Product.fromFirestore(
+    String id,
+    Map<String, dynamic> data,
+  ) {
+    return Product(
+      id: id,
+      name: data['name']?.toString() ?? '',
+      sku: data['sku']?.toString() ?? '',
+      barcode: data['barcode']?.toString() ?? '',
+      category: data['category']?.toString() ?? '',
+      quantity: _toInt(data['quantity']),
+      lowStockThreshold: _toInt(data['minStock']),
+      price: _toDouble(data['price']),
+    );
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'name': name.trim(),
+      'sku': sku.trim(),
+      'barcode': barcode.trim(),
+      'category': category.trim(),
+      'quantity': quantity,
+      'minStock': lowStockThreshold,
+      'price': price,
+    };
+  }
+
   Product copyWith({
     String? id,
     String? name,
@@ -41,5 +69,19 @@ class Product {
       lowStockThreshold: lowStockThreshold ?? this.lowStockThreshold,
       price: price ?? this.price,
     );
+  }
+
+  static int _toInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static double _toDouble(dynamic value) {
+    if (value is double) return value;
+    if (value is num) return value.toDouble();
+
+    return double.tryParse(value?.toString() ?? '') ?? 0;
   }
 }
