@@ -29,9 +29,7 @@ class _AppShellState extends State<AppShell> {
   Future<void> _openAddProduct() async {
     final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute<bool>(
-        builder: (_) => AddEditProductScreen(
-          productService: _productService,
-        ),
+        builder: (_) => AddEditProductScreen(productService: _productService),
       ),
     );
 
@@ -40,9 +38,7 @@ class _AppShellState extends State<AppShell> {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Product added successfully.'),
-      ),
+      const SnackBar(content: Text('Product added successfully.')),
     );
   }
 
@@ -73,10 +69,9 @@ class _AppShellState extends State<AppShell> {
                     const SizedBox(height: 14),
                     Text(
                       'Unable to load inventory',
-                      style:
-                          Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -92,9 +87,7 @@ class _AppShellState extends State<AppShell> {
 
         if (!snapshot.hasData) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -112,15 +105,15 @@ class _AppShellState extends State<AppShell> {
             onAddProduct: _openAddProduct,
             productService: _productService,
           ),
-          const ScannerScreen(),
+          ScannerScreen(
+            productService: _productService,
+            isActive: _selectedIndex == 2,
+          ),
           const SettingsScreen(),
         ];
 
         return Scaffold(
-          body: IndexedStack(
-            index: _selectedIndex,
-            children: screens,
-          ),
+          body: IndexedStack(index: _selectedIndex, children: screens),
           bottomNavigationBar: NavigationBar(
             selectedIndex: _selectedIndex,
             onDestinationSelected: _setTab,
